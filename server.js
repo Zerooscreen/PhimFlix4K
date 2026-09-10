@@ -6,7 +6,7 @@ const { head, layout, posterCard, genreRow, trailerBlock, castGrid, similarGrid,
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const SITE_URL = process.env.SITE_URL || 'https://phimflix4k.up.railway.app';
+const SITE_URL = process.env.SITE_URL ||'https://phimflix4k.up.railway.app';
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,6 +43,7 @@ async function renderHome(req, res, tab) {
     const hero = heroData.results[0];
     const heroTitle = hero ? (hero.title || hero.name) : 'PhimFlix4K';
     const heroOverview = hero ? (hero.overview || '') : '';
+    const heroYear = hero ? (hero.release_date || hero.first_air_date || '').slice(0, 4) : '';
 
     const rowsHtml = [];
     for (const def of ROWS[tab]) {
@@ -71,8 +72,8 @@ async function renderHome(req, res, tab) {
     const bodyHtml = heroHtml + `<div id="rows">${rowsHtml.join('')}</div>`;
 
     const headHtml = head({
-      title: 'Xem Phim!— ${movie.title} [${movie.year}] Full HD Vietsub Miễn Phí Online',
-      description: `Xem ${movie.title} (${movie.original_title}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${movie.title}',
+      title: hero ? `Xem Phim!— ${heroTitle} [${heroYear}] Full HD Vietsub Miễn Phí Online` : 'PhimFlix4K',
+      description: hero ? `Xem ${heroTitle} (${hero.original_title || heroTitle}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${heroTitle}.` : 'Trạm cày phim online',
       url: `${SITE_URL}/${tab}`,
       image: hero ? img(hero.backdrop_path, 'w780') : null,
     });
@@ -222,6 +223,7 @@ app.get('/watch/:type/:id/:slug?', async (req, res) => {
     const data = await tmdb(endpoint);
     const title = data.title || data.name;
     const correctSlug = slugify(title);
+    const mediaYear = (data.release_date || data.first_air_date || '').slice(0, 4);
 
     const bodyHtml = `
       <div style="max-width: 900px; margin: 40px auto; padding: 20px; text-align: center;">
@@ -251,8 +253,8 @@ app.get('/watch/:type/:id/:slug?', async (req, res) => {
     `;
 
     const headHtml = head({
-      title: `Xem Phim!— ${movie.title} [${movie.year}] Full HD Vietsub Miễn Phí Online`,
-      description: `Xem ${movie.title} (${movie.original_title}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${movie.title}.`,
+      title: `Xem Phim!— ${title} [${mediaYear}] Full HD Vietsub Miễn Phí Online`,
+      description: `Xem ${title} (${data.original_title || title}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${title}.`,
       url: `${SITE_URL}/watch/${type}/${id}/${encodeURIComponent(correctSlug)}?vi`,
       image: img(data.backdrop_path || data.poster_path, 'w780'),
     });
@@ -303,7 +305,7 @@ app.get('/person/:id/:slug?', async (req, res) => {
 
     const headHtml = head({
       title: `Diễn viên: ${person.name} - PhimFlix4K`,
-      description: `Thông tin chi tiết và tiểu sử của diễn viên ${person.name} trên VieFlixHD.`,
+      description: `Thông tin chi tiết và tiểu sử của diễn viên ${person.name} trên PhimFlix4K.`,
       url: `${SITE_URL}/person/${id}/${encodeURIComponent(correctSlug)}?vi`,
       image: img(person.profile_path, 'w780'),
     });
@@ -349,4 +351,4 @@ app.get('/sitemap.xml', async (req, res) => {
 
 app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`));
 
-app.listen(PORT, () => console.log(`VieFlixHD đang chạy tại: http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`PhimFlix4K đang chạy tại: http://localhost:${PORT}`));
