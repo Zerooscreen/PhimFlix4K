@@ -6,7 +6,7 @@ const { head, layout, posterCard, genreRow, trailerBlock, castGrid, similarGrid,
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const SITE_URL = process.env.SITE_URL ||'https://phimflix4k.up.railway.app';
+const SITE_URL = process.env.SITE_URL || 'https://phimflix4k.up.railway.app';
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -34,7 +34,7 @@ function seoTitle(kind, title, year) {
 function seoDescription(title, year, genreNames) {
   const yearPart = year ? `năm ${year}, ` : '';
   const genrePart = genreNames ? `thể loại ${genreNames}, ` : '';
-  return `Xem phim ${title} trên PhimFlix4K. ${genrePart}${yearPart}Tốc độ cao, sub chuẩn, không quảng cáo!`;
+  return `Xem phim ${title} pada PhimFlix4K. ${genrePart}${yearPart}Tốc độ cao, sub chuẩn, không quảng cáo!`;
 }
 
 async function renderHome(req, res, tab) {
@@ -72,7 +72,7 @@ async function renderHome(req, res, tab) {
     const bodyHtml = heroHtml + `<div id="rows">${rowsHtml.join('')}</div>`;
 
     const headHtml = head({
-      title: hero ? `Xem Phim!— ${heroTitle} [${heroYear}] Full HD Vietsub Miễn Phí Online` : 'PhimFlix4K',
+      title: hero ? `Xem Phim! — ${heroTitle} [${heroYear}] Full HD Vietsub Miễn Phí Online` : 'PhimFlix4K',
       description: hero ? `Xem ${heroTitle} (${hero.original_title || heroTitle}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${heroTitle}.` : 'Trạm cày phim online',
       url: `${SITE_URL}/${tab}`,
       image: hero ? img(hero.backdrop_path, 'w780') : null,
@@ -82,7 +82,7 @@ async function renderHome(req, res, tab) {
   } catch (e) {
     res.status(500).send(layout({
       headHtml: head({ title: 'PhimFlix4K', description: 'Trạm cày phim online', url: `${SITE_URL}/${tab}` }),
-      bodyHtml: `<div class="empty">Không thể tải dữ liệu. Vui lòng thử lại sau.</div>`,
+      bodyHtml: `<div class="empty">Tidak dapat memuat data. Silakan coba lagi nanti.</div>`,
       activeTab: tab,
     }));
   }
@@ -253,7 +253,7 @@ app.get('/watch/:type/:id/:slug?', async (req, res) => {
     `;
 
     const headHtml = head({
-      title: `Xem Phim!— ${title} [${mediaYear}] Full HD Vietsub Miễn Phí Online`,
+      title: `Xem Phim! — ${title} [${mediaYear}] Full HD Vietsub Miễn Phí Online`,
       description: `Xem ${title} (${data.original_title || title}) Motchill. Bản đẹp Full HD, Vietsub Thuyết Minh đầy đủ, cập nhật nhanh nhất hành trình của ${title}.`,
       url: `${SITE_URL}/watch/${type}/${id}/${encodeURIComponent(correctSlug)}?vi`,
       image: img(data.backdrop_path || data.poster_path, 'w780'),
@@ -344,9 +344,14 @@ app.get('/sitemap.xml', async (req, res) => {
       ...mp.results.map(m => `${SITE_URL}/movie/${m.id}/${encodeURIComponent(slugify(m.title))}?vi`),
       ...tp.results.map(t => `${SITE_URL}/tv/${t.id}/${encodeURIComponent(slugify(t.name))}?vi`)
     ];
-    const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map(u => `<url><loc>${u}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>`).join('')}</urlset>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(u => `  <url><loc>${u}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq></url>`).join('\n')}
+</urlset>`;
     res.type('application/xml').send(xml);
-  } catch (e) { res.status(500).send(''); }
+  } catch (e) { 
+    res.status(500).send('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>'); 
+  }
 });
 
 app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`));
